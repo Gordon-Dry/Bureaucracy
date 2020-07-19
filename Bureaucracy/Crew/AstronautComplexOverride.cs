@@ -10,9 +10,9 @@ namespace Bureaucracy
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
     public class AstronautComplexOverride : MonoBehaviour
     {
-        public bool astronautComplexSpawned;
+        public bool AstronautComplexSpawned;
         public static AstronautComplexOverride Instance;
-        public int updateCount = 4;
+        public int UpdateCount = 4;
 
         private void Awake()
         {
@@ -21,10 +21,10 @@ namespace Bureaucracy
 
         private void LateUpdate()
         {
-            if (!astronautComplexSpawned || updateCount <= 0) return;
+            if (!AstronautComplexSpawned || UpdateCount <= 0) return;
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             List<CrewListItem> crewItems = FindObjectsOfType<CrewListItem>().ToList();
-            updateCount--;
+            UpdateCount--;
             for (int i = 0; i < crewItems.Count; i++)
             {
                 CrewListItem c = crewItems.ElementAt(i);
@@ -34,7 +34,7 @@ namespace Bureaucracy
             }
         }
 
-        private string GenerateAstronautString(string kerbalName)
+        private static string GenerateAstronautString(string kerbalName)
         {
             CrewMember c = CrewManager.Instance.Kerbals[kerbalName];
             //if for whatever reason we can't find the CrewMember just leave it at default
@@ -50,11 +50,9 @@ namespace Bureaucracy
                 sb.AppendLine("Morale: " + Math.Round(morale, 0) + "% | Wage: " + c.Wage);
             }
 
-            if (SettingsClass.Instance.RetirementEnabled)
-            {
-                KeyValuePair<int, string> retirementDate = Utilities.Instance.ConvertUtToRealTime(c.retirementDate - Planetarium.GetUniversalTime());
-                sb.AppendLine("Retires in " + retirementDate.Key + " " + retirementDate.Value);
-            }
+            if (!SettingsClass.Instance.RetirementEnabled) return sb.ToString();
+            KeyValuePair<int, string> retirementDate = Utilities.ConvertUtToRealTime(c.RetirementDate - Planetarium.GetUniversalTime());
+            sb.AppendLine("Retires in " + retirementDate.Key + " " + retirementDate.Value);
 
             return sb.ToString();
         }

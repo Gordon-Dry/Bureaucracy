@@ -92,7 +92,7 @@ namespace Bureaucracy
             {
                 KeyValuePair<string, CrewMember> kvp = Kerbals.ElementAt(i);
                 if (kvp.Value.CrewReference().rosterStatus != ProtoCrewMember.RosterStatus.Available) continue;
-                if (kvp.Value.retirementDate > Planetarium.GetUniversalTime()) continue;
+                if (kvp.Value.RetirementDate > Planetarium.GetUniversalTime()) continue;
                 Debug.Log("[Bureaucracy]: " + kvp.Value.Name + " has retired");
                 HighLogic.CurrentGame.CrewRoster.Remove(kvp.Value.CrewReference());
                 ScreenMessages.PostScreenMessage("[Bureaucracy]: " + kvp.Key + " has retired");
@@ -134,7 +134,7 @@ namespace Bureaucracy
                 CrewMember c = Kerbals.ElementAt(i).Value;
                 if (!c.Unhappy) continue;
                 string outcome = c.UnhappyOutcome();
-                Debug.Log("[Bureaucracy]: Unhappy Crewmember "+c.Name+" "+outcome);
+                Debug.Log("[Bureaucracy]: Unhappy CrewMember "+c.Name+" "+outcome);
                 UnhappyCrewOutcomes.Add(c, outcome);
             }
         }
@@ -166,9 +166,9 @@ namespace Bureaucracy
             CrewMember newCrew = new CrewMember(crewMember.name);
             Kerbals.Add(crewMember.name, newCrew );
             if (!SettingsClass.Instance.AstronautTraining) return;
-            double trainingPeriod = Utilities.Instance.GetMonthLength();
+            double trainingPeriod = Utilities.GetMonthLength();
             crewMember.SetInactive(trainingPeriod);
-            Debug.Log("[Bureaucracy]: New Crewmember added: " + newCrew.Name + ". Training for " + trainingPeriod);
+            Debug.Log("[Bureaucracy]: New CrewMember added: " + newCrew.Name + ". Training for " + trainingPeriod);
         }
 
         public void ProcessDeadKerbal(ProtoCrewMember crewMember)
@@ -197,7 +197,7 @@ namespace Bureaucracy
             return false;
         }
 
-        private bool CrewOnValidVessel(ProtoCrewMember crewMember)
+        private static bool CrewOnValidVessel(ProtoCrewMember crewMember)
         {
             return crewMember.seat != null && crewMember.seat.vessel != null;
         }

@@ -12,10 +12,10 @@ namespace Bureaucracy
         public float FundingAllocation = 0.3f;
         public double ThisMonthsBudget;
 
-        protected double ProgressTime()
+        protected static double ProgressTime()
         {
             //How long since the last update?
-            double timeElapsed = Planetarium.GetUniversalTime() - Bureaucracy.Instance.lastProgressUpdate;
+            double timeElapsed = Planetarium.GetUniversalTime() - Bureaucracy.Instance.LastProgressUpdate;
             //convert that into days
             timeElapsed /= FlightGlobals.GetHomeBody().solarDayLength;
             return timeElapsed;

@@ -24,20 +24,20 @@ namespace Bureaucracy
     public class Bureaucracy : MonoBehaviour
     {
         [UsedImplicitly] private Utilities utilitiesReference = new Utilities();
-        public SettingsClass settings;
+        public SettingsClass Settings;
         public static Bureaucracy Instance;
-        public List<Manager> registeredManagers = new List<Manager>();
-        public bool existingSave;
-        public ManagerProgressEvent progressEvent;
-        public double lastProgressUpdate = 0;
+        public List<Manager> RegisteredManagers = new List<Manager>();
+        public bool ExistingSave;
+        [UsedImplicitly] public ManagerProgressEvent ProgressEvent;
+        public double LastProgressUpdate;
 
         private void Awake()
         {
             //Mod starts here.
-            settings = new SettingsClass();
+            Settings = new SettingsClass();
             RegisterBureaucracyManagers();
             Instance = this;
-            lastProgressUpdate = Planetarium.GetUniversalTime();
+            LastProgressUpdate = Planetarium.GetUniversalTime();
             Debug.Log("[Bureaucracy]: Awake");
         }
 
@@ -45,31 +45,37 @@ namespace Bureaucracy
         {
             InternalListeners.OnBudgetAwarded.Add(GeneratePostBudgetReport);
             KacWrapper.InitKacWrapper();
-            if (SettingsClass.Instance.KctError && Directory.Exists(KSPUtil.ApplicationRootPath + "/GameData/KerbalConstructionTime")) UiController.Instance.errorWindow = UiController.Instance.KctError();
+            if (SettingsClass.Instance.KctError && Directory.Exists(KSPUtil.ApplicationRootPath + "/GameData/KerbalConstructionTime")) UiController.Instance.ErrorWindow = UiController.KctError();
         }
         
         private void RegisterBureaucracyManagers()
         {
             //Register internal manager classes (and gives me a place to store the references). Expandable.
-            registeredManagers.Add(new BudgetManager());
-            registeredManagers.Add(new FacilityManager());
-            registeredManagers.Add(new ResearchManager());
-            registeredManagers.Add(new CrewManager(HighLogic.CurrentGame.CrewRoster.Crew.ToList()));
+            RegisteredManagers.Add(new BudgetManager());
+            RegisteredManagers.Add(new FacilityManager());
+            RegisteredManagers.Add(new ResearchManager());
+            RegisteredManagers.Add(new CrewManager(HighLogic.CurrentGame.CrewRoster.Crew.ToList()));
         }
 
         public void RetryKacAlarm()
         {
             //KAC API isn't always ready when we try to add an alarm, so we retry after a few seconds.
-            if (!KacWrapper.AssemblyExists) return;
+            if (!KacWrapper.AssemblyExists)
+            {
+                Debug.Log("[Bureaucracy]: Still can't find KAC. Assuming it's not installed");
+                return;
+            }
             KacWrapper.Kacapi.KacAlarmList kacAlarms = KacWrapper.Kac.Alarms;
             for (int i = 0; i < kacAlarms.Count; i++)
             {
                 KacWrapper.Kacapi.KacAlarm alarm = kacAlarms.ElementAt(i);
-                if (alarm.Name == "Next Budget") return;
+                if (alarm.Name != "Next Budget") continue;
+                Debug.Log("[Bureaucracy]: KAC Alarm already exists.");
+                return;
             }
-
             double alarmTime = Planetarium.GetUniversalTime() + SettingsClass.Instance.TimeBetweenBudgets * FlightGlobals.GetHomeBody().solarDayLength;
-            Utilities.Instance.NewKacAlarm("Next Budget", alarmTime);
+            Utilities.NewKacAlarm("Next Budget", alarmTime);
+            Debug.Log("[Bureaucracy]: Created new KAC Alarm at "+alarmTime);
         }
 
         public void SetCalcsDirty()
@@ -81,14 +87,14 @@ namespace Bureaucracy
         public void RegisterManager(Manager m)
         {
             //For mods to register custom managers.
-            if (registeredManagers.Contains(m))
+            if (RegisteredManagers.Contains(m))
             {
                 Debug.Log("[Bureaucracy]: Attempted to register manager" +m.Name+ " but already exists");
                 return;
             }
 
             Debug.Log("[Bureaucracy]: Registered Custom Manager" +m.Name);
-            registeredManagers.Add(m);
+            RegisteredManagers.Add(m);
         }
 
         public void OnLoad(ConfigNode node)
@@ -102,9 +108,9 @@ namespace Bureaucracy
             CrewManager.Instance.OnLoad(node);
             RandomEventLoader.Instance.OnLoad(node);
             UiController.Instance.OnLoad(node);
-            node.TryGetValue("existingSave", ref existingSave);
-            node.TryGetValue("lastProgressUpdate", ref lastProgressUpdate);
-            if(progressEvent == null) progressEvent = new ManagerProgressEvent();
+            node.TryGetValue("existingSave", ref ExistingSave);
+            node.TryGetValue("lastProgressUpdate", ref LastProgressUpdate);
+            ProgressEvent ??= new ManagerProgressEvent();
             Debug.Log("[Bureaucracy]: OnLoad Complete");
         }
 
@@ -119,8 +125,8 @@ namespace Bureaucracy
             CrewManager.Instance.OnSave(node);
             RandomEventLoader.Instance.OnSave(node);
             UiController.Instance.OnSave(node);
-            node.SetValue("existingSave", existingSave, true);
-            node.SetValue("lastProgressUpdate", lastProgressUpdate, true);
+            node.SetValue("existingSave", ExistingSave, true);
+            node.SetValue("lastProgressUpdate", LastProgressUpdate, true);
             Debug.Log("[Bureaucracy]: OnSave Complete");
         }
 
@@ -128,18 +134,18 @@ namespace Bureaucracy
         {
             //All Managers generate a report.
             Debug.Log("[Bureaucracy]: Firing Manager Reports");
-            for (int i = 0; i < registeredManagers.Count; i++)
+            for (int i = 0; i < RegisteredManagers.Count; i++)
             {
-                Manager m = registeredManagers.ElementAt(i);
+                Manager m = RegisteredManagers.ElementAt(i);
                 m.MakeReport();
             }
         }
 
         private void OnDisable()
         {
-            for (int i = 0; i < registeredManagers.Count; i++)
+            for (int i = 0; i < RegisteredManagers.Count; i++)
             {
-                Manager m = registeredManagers.ElementAt(i);
+                Manager m = RegisteredManagers.ElementAt(i);
                 m.UnregisterEvents();
             }
             InternalListeners.OnBudgetAwarded.Remove(GeneratePostBudgetReport);

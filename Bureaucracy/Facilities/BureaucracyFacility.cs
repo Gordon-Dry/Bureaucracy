@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using JetBrains.Annotations;
 using UnityEngine;
 using Upgradeables;
 
@@ -100,44 +100,22 @@ namespace Bureaucracy
 
         private int SetCosts()
         {
-            int cost;
-            switch (Name)
+            return Name switch
             {
-                case "Administration":
-                    cost = SettingsClass.Instance.AdminCost;
-                    break;
-                case "AstronautComplex":
-                    cost = SettingsClass.Instance.AstronautComplexCost;
-                    break;
-                case "MissionControl":
-                    cost = SettingsClass.Instance.MissionControlCost;
-                    break;
-                case "SpaceplaneHangar":
-                    cost = SettingsClass.Instance.SphCost;
-                    break;
-                case "TrackingStation":
-                    cost = SettingsClass.Instance.TrackingStationCost;
-                    break;
-                case "ResearchAndDevelopment":
-                    cost = SettingsClass.Instance.RndCost;
-                    break;
-                case "VehicleAssemblyBuilding":
-                    cost = SettingsClass.Instance.VabCost;
-                    break;
-                case "Observatory":
-                    cost = SettingsClass.Instance.ObservatoryCost;
-                    break;
-                case "Other Facility":
-                    cost = SettingsClass.Instance.OtherFacilityCost;
-                    break;
-                default:
-                    cost = 0;
-                    break;
-            }
-
-            return cost;
+                "Administration" => SettingsClass.Instance.AdminCost,
+                "AstronautComplex" => SettingsClass.Instance.AstronautComplexCost,
+                "MissionControl" => SettingsClass.Instance.MissionControlCost,
+                "SpaceplaneHangar" => SettingsClass.Instance.SphCost,
+                "TrackingStation" => SettingsClass.Instance.TrackingStationCost,
+                "ResearchAndDevelopment" => SettingsClass.Instance.RndCost,
+                "VehicleAssemblyBuilding" => SettingsClass.Instance.VabCost,
+                "Observatory" => SettingsClass.Instance.ObservatoryCost,
+                "Other Facility" => SettingsClass.Instance.OtherFacilityCost,
+                _ => 0
+            };
         }
 
+        [SuppressMessage("ReSharper", "Unity.PerformanceCriticalCodeInvocation")]
         public void StartUpgrade(UpgradeableFacility facilityToUpgrade)
         {
             Upgrade = new FacilityUpgradeEvent(facilityToUpgrade.id, this);
@@ -192,6 +170,7 @@ namespace Bureaucracy
             Upgrade = null;
             recentlyUpgraded = true;
             IsPriority = false;
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             Debug.Log("[Bureaucracy]: Upgrade of " + Name + " completed");
         }
 
@@ -229,6 +208,7 @@ namespace Bureaucracy
 
         private IEnumerable<DestructibleBuilding> Destructibles()
         {
+            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
             foreach (KeyValuePair<string, ScenarioDestructibles.ProtoDestructible> kvp in ScenarioDestructibles.protoDestructibles)
             {
                 if (!kvp.Key.Contains(Name)) continue;
@@ -243,6 +223,7 @@ namespace Bureaucracy
             Upgrade = null;
             Upgrading = false;
             IsPriority = false;
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             Debug.Log("[Bureaucracy]: Upgrade of "+Name+" cancelled");
             ScreenMessages.PostScreenMessage("[Bureaucracy]: " + Name + " - Upgrade cancelled");
         }

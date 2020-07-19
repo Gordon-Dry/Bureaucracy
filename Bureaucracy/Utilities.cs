@@ -15,25 +15,25 @@ namespace Bureaucracy
         {
             Instance = this;
         }
-        public void NewKacAlarm(string alarmName, double alarmTime)
+        public static void NewKacAlarm(string alarmName, double alarmTime)
         {
-            if (!Bureaucracy.Instance.settings.StopTimeWarp) return;
+            if (!Bureaucracy.Instance.Settings.StopTimeWarp) return;
             if (!KacWrapper.AssemblyExists) return;
             if (!KacWrapper.ApiReady) return;
             KacWrapper.Kac.CreateAlarm(KacWrapper.Kacapi.AlarmTypeEnum.Raw, alarmName, alarmTime);
         }
         
-        public double GetGrossBudget()
+        public static double GetGrossBudget()
         {
             return Math.Round(Reputation.Instance.reputation * SettingsClass.Instance.BudgetMultiplier, 0);
         }
 
-        public double GetMonthLength()
+        public static double GetMonthLength()
         {
             return FlightGlobals.GetHomeBody().solarDayLength * SettingsClass.Instance.TimeBetweenBudgets;
         }
 
-        public double GetNetBudget(string department)
+        public static double GetNetBudget(string department)
         {
             
             double funding = GetGrossBudget();
@@ -46,9 +46,9 @@ namespace Bureaucracy
                 case "Budget":
                 {
                     //Budget just gets whatever is left, so we need to figure out how much the other departments are getting first.
-                    for (int i = 0; i < Bureaucracy.Instance.registeredManagers.Count; i++)
+                    for (int i = 0; i < Bureaucracy.Instance.RegisteredManagers.Count; i++)
                     {
-                        Manager m = Bureaucracy.Instance.registeredManagers.ElementAt(i);
+                        Manager m = Bureaucracy.Instance.RegisteredManagers.ElementAt(i);
                         if (m == BudgetManager.Instance) continue;
                         allocation -= m.FundingAllocation;
                     }
@@ -65,31 +65,31 @@ namespace Bureaucracy
         }
 
         //Turns UniversalTime into years (or days if <1 year)
-        public KeyValuePair<int, string> ConvertUtToRealTime(double ut)
+        public static KeyValuePair<int, string> ConvertUtToRealTime(double ut)
         {
             int timeStamp = 0;
-            CelestialBody homeworld = FlightGlobals.GetHomeBody();
-            while (ut > homeworld.orbit.period)
+            CelestialBody homeWorld = FlightGlobals.GetHomeBody();
+            while (ut > homeWorld.orbit.period)
             {
                 timeStamp++;
-                ut -= homeworld.orbit.period;
+                ut -= homeWorld.orbit.period;
             }
             if(timeStamp >0) return new KeyValuePair<int, string>(timeStamp, "years");
-            while (ut > homeworld.solarDayLength)
+            while (ut > homeWorld.solarDayLength)
             {
                 timeStamp++;
-                ut -= homeworld.solarDayLength;
+                ut -= homeWorld.solarDayLength;
             }
             return new KeyValuePair<int, string>(timeStamp, "days");
         }
 
-        public double ConvertMonthlyBudgetToDaily(double amountToConvert)
+        public static double ConvertMonthlyBudgetToDaily(double amountToConvert)
         {
             double multiplier = 1 / SettingsClass.Instance.TimeBetweenBudgets;
             return amountToConvert * multiplier;
         }
         
-        public void PayWageDebt(double debt)
+        public static void PayWageDebt(double debt)
         {
             debt = Math.Abs(debt);
             debt -= Funding.Instance.Funds;
@@ -105,7 +105,7 @@ namespace Bureaucracy
             CrewManager.Instance.ProcessUnpaidKerbals(unpaidKerbals);
         }
 
-        public void PayFacilityDebt(double debt, double wageDebt)
+        public static void PayFacilityDebt(double debt, double wageDebt)
         {
             double fundsAvailable = Funding.Instance.Funds - wageDebt;
             debt -= fundsAvailable;
@@ -118,7 +118,7 @@ namespace Bureaucracy
             }
         }
 
-        public void SabotageLaunch()
+        public static void SabotageLaunch()
         {
             for (int i = 0; i < FlightGlobals.ActiveVessel.Parts.Count; i++)
             {
@@ -131,11 +131,11 @@ namespace Bureaucracy
                 }
             }
 
-            UiController.Instance.errorWindow = UiController.Instance.NoLaunchesWindow();
+            UiController.Instance.ErrorWindow = UiController.NoLaunchesWindow();
         }
 
         //Turns UniversalTime into KSP date format "Y1 D1"
-        public string ConvertUtToKspTimeStamp(double universalTimeStamp)
+        public static string ConvertUtToKspTimeStamp(double universalTimeStamp)
         {
             int years = 1;
             int days = 1;
@@ -170,15 +170,15 @@ namespace Bureaucracy
             return "Wernher Von Kerman";
         }
 
-        public string GetARandomBody()
+        public static string GetARandomBody()
         {
             return FinePrint.Utilities.CelestialUtilities.RandomBody(FlightGlobals.Bodies).displayName;
         }
-        public Manager GetManagerByName(string managerName)
+        public static Manager GetManagerByName(string managerName)
         {
-            for (int i = 0; i < Bureaucracy.Instance.registeredManagers.Count; i++)
+            for (int i = 0; i < Bureaucracy.Instance.RegisteredManagers.Count; i++)
             {
-                Manager m = Bureaucracy.Instance.registeredManagers.ElementAt(i);
+                Manager m = Bureaucracy.Instance.RegisteredManagers.ElementAt(i);
                 if (m.Name != managerName) continue;
                 return m;
             }

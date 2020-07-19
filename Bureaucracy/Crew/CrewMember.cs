@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Expansions.Missions;
-using KSPAchievements;
 using UnityEngine;
 
 namespace Bureaucracy
@@ -15,8 +13,8 @@ namespace Bureaucracy
         public bool Unhappy;
         public float WageModifier = 1.0f;
         //private bool onVacation;
-        public double retirementDate;
-        public bool aboutToRetire = false;
+        public double RetirementDate;
+        public bool AboutToRetire = false;
 
         public string Name { get; private set; }
 
@@ -39,14 +37,14 @@ namespace Bureaucracy
             {
                 int minTerm = SettingsClass.Instance.MinimumTerm;
                 int maxTerm = SettingsClass.Instance.MaximumTerm;
-                retirementDate = Utilities.Instance.Randomise.Next(minTerm, maxTerm) * FlightGlobals.GetHomeBody().orbit.period + Planetarium.GetUniversalTime();
+                RetirementDate = Utilities.Instance.Randomise.Next(minTerm, maxTerm) * FlightGlobals.GetHomeBody().orbit.period + Planetarium.GetUniversalTime();
             }
             Debug.Log("[Bureaucracy]: New CrewMember setup: "+kerbalName);
         }
         
         public void AllocateBonus(double timeOnMission)
         {
-            KeyValuePair<int, string> kvp = Utilities.Instance.ConvertUtToRealTime(timeOnMission);
+            KeyValuePair<int, string> kvp = Utilities.ConvertUtToRealTime(timeOnMission);
             double payout;
             if (kvp.Value == "years") payout = kvp.Key * SettingsClass.Instance.LongTermBonusYears;
             else payout = kvp.Key * SettingsClass.Instance.LongTermBonusDays;
@@ -89,7 +87,7 @@ namespace Bureaucracy
         {
             int newLevel = CrewReference().experienceLevel + 1;
             KerbalRoster.SetExperienceLevel(CrewReference(), newLevel);
-            CrewReference().SetInactive(newLevel * Utilities.Instance.GetMonthLength());
+            CrewReference().SetInactive(newLevel * Utilities.GetMonthLength());
         }
 
         public int GetBonus(bool clearBonus)
@@ -105,7 +103,7 @@ namespace Bureaucracy
             crewNode.SetValue("Name", Name, true);
             crewNode.SetValue("Bonus", bonusAwaitingPayment, true);
             crewNode.SetValue("WageModifier", WageModifier, true);
-            crewNode.SetValue("RetirementDate", retirementDate, true);
+            crewNode.SetValue("RetirementDate", RetirementDate, true);
             for (int i = 0; i < UnhappinessEvents.Count; i++)
             {
                 CrewUnhappiness cu = UnhappinessEvents.ElementAt(i);
@@ -118,7 +116,7 @@ namespace Bureaucracy
         {
             Name = crewConfig.GetValue("Name");
             double.TryParse(crewConfig.GetValue("Bonus"), out bonusAwaitingPayment);
-            double.TryParse(crewConfig.GetValue("RetirementDate"), out retirementDate);
+            double.TryParse(crewConfig.GetValue("RetirementDate"), out RetirementDate);
             if (!crewConfig.TryGetValue("WageModifier", ref WageModifier)) WageModifier = 1.0f;
             ConfigNode[] unhappyNodes = crewConfig.GetNodes("UNHAPPINESS");
             for (int i = 0; i < unhappyNodes.Length; i++)
@@ -154,7 +152,7 @@ namespace Bureaucracy
 
         public void ExtendRetirementAge(double extension)
         {
-            retirementDate += extension;
+            RetirementDate += extension;
         }
     }
 }

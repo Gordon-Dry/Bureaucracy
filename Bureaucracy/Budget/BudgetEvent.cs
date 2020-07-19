@@ -14,7 +14,7 @@ namespace Bureaucracy
             CompletionTime = budgetTime;
             Name = "Next Budget";
             ParentManager = manager;
-            if(newKacAlarm) Utilities.Instance.NewKacAlarm("Next Budget", CompletionTime);
+            if(newKacAlarm) Utilities.NewKacAlarm("Next Budget", CompletionTime);
             StopTimewarpOnCompletion = true;
             AddTimer();
         }
@@ -24,18 +24,19 @@ namespace Bureaucracy
             Debug.Log("Bureaucracy]: OnBudgetAboutToFire");
             //Allows other Managers to do pre-budget work, as once the budget is done alot of stuff gets reset.
             InternalListeners.OnBudgetAboutToFire.Fire();
+            // ReSharper disable once UnusedVariable
             RepDecay repDecay = new RepDecay();
-            repDecay.ApplyHardMode();
-            double funding = Utilities.Instance.GetNetBudget("Budget");
+            RepDecay.ApplyHardMode();
+            double funding = Utilities.GetNetBudget("Budget");
             funding -= CrewManager.Instance.Bonuses(funding, true);
-            double facilityDebt = Costs.Instance.GetFacilityMaintenanceCosts();
+            double facilityDebt = Costs.GetFacilityMaintenanceCosts();
             double wageDebt = Math.Abs(funding + facilityDebt);
             if (funding < 0)
             {
                 Debug.Log("[Bureaucracy]: Funding < 0. Paying debts");
                 //pay wages first then facilities
-                Utilities.Instance.PayWageDebt(wageDebt);
-                Utilities.Instance.PayFacilityDebt(facilityDebt, wageDebt);
+                Utilities.PayWageDebt(wageDebt);
+                Utilities.PayFacilityDebt(facilityDebt, wageDebt);
             }
             CrewManager.Instance.ProcessUnhappyCrew();
             if(SettingsClass.Instance.UseItOrLoseIt && funding > Funding.Instance.Funds) Funding.Instance.SetFunds(0.0d, TransactionReasons.Contracts);
@@ -43,11 +44,11 @@ namespace Bureaucracy
             Debug.Log("[Bureaucracy]: OnBudgetAwarded. Awarding "+funding+" Costs: "+facilityDebt);
             InternalListeners.OnBudgetAwarded.Fire(funding, facilityDebt);
             Costs.Instance.ResetLaunchCosts();
-            repDecay.ApplyRepDecay(Bureaucracy.Instance.settings.RepDecayPercent);
-            for (int i = 0; i < Bureaucracy.Instance.registeredManagers.Count; i++)
+            RepDecay.ApplyRepDecay(Bureaucracy.Instance.Settings.RepDecayPercent);
+            for (int i = 0; i < Bureaucracy.Instance.RegisteredManagers.Count; i++)
             {
-                Manager m = Bureaucracy.Instance.registeredManagers.ElementAt(i);
-                m.ThisMonthsBudget = Utilities.Instance.GetNetBudget(m.Name);
+                Manager m = Bureaucracy.Instance.RegisteredManagers.ElementAt(i);
+                m.ThisMonthsBudget = Utilities.GetNetBudget(m.Name);
             }
             InformParent();
         }

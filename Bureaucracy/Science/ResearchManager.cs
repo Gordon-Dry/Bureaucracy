@@ -22,13 +22,13 @@ namespace Bureaucracy
         
         public override double GetAllocatedFunding()
         {
-            return Math.Round(Utilities.Instance.GetNetBudget(Name), 0);
+            return Math.Round(Utilities.GetNetBudget(Name), 0);
         }
 
 
         public override void ProgressTask()
         {
-            double researchBudget = Utilities.Instance.ConvertMonthlyBudgetToDaily(ThisMonthsBudget) * ProgressTime() * ScienceMultiplier;
+            double researchBudget = Utilities.ConvertMonthlyBudgetToDaily(ThisMonthsBudget) * ProgressTime() * ScienceMultiplier;
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (researchBudget == 0.0f) return;
             List<ScienceEvent> scienceCache = ProcessingScience.Values.ToList();
@@ -69,8 +69,7 @@ namespace Bureaucracy
             if (researchNode == null) return;
             float.TryParse(researchNode.GetValue("ScienceMultiplier"), out ScienceMultiplier);
             float.TryParse(researchNode.GetValue("FundingAllocation"), out float funding);
-            if(double.TryParse(researchNode.GetValue("thisMonth"), out double d)) ThisMonthsBudget = d;
-            else ThisMonthsBudget = Utilities.Instance.GetNetBudget(Name);
+            ThisMonthsBudget = double.TryParse(researchNode.GetValue("thisMonth"), out double d) ? d : Utilities.GetNetBudget(Name);
             FundingAllocation = funding;
             ConfigNode[] scienceNodes = researchNode.GetNodes("SCIENCE_DATA");
             if (scienceNodes.Length == 0) return;

@@ -4,7 +4,7 @@ namespace Bureaucracy
 {
     public class RepDecay
     {
-        public void ApplyHardMode()
+        public static void ApplyHardMode()
         {
             if (!DecayIsValid(true)) return;
             Debug.Log("[Bureaucracy]: Applying Hard Mode");
@@ -19,7 +19,7 @@ namespace Bureaucracy
             return hardMode || SettingsClass.Instance.RepDecayEnabled;
         }
 
-        public void ApplyRepDecay(int decayPercent)
+        public static void ApplyRepDecay(int decayPercent)
         {
             if (!DecayIsValid(false)) return;
             Debug.Log("[Bureaucracy]: Applying Rep Decay");

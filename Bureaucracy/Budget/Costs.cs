@@ -60,7 +60,7 @@ namespace Bureaucracy
             return launchCostsSph + launchCostsVab;
         }
 
-        public double GetWageCosts()
+        public static double GetWageCosts()
         {
             List<CrewMember> crew = CrewManager.Instance.Kerbals.Values.ToList();
             double wage = 0;
@@ -73,7 +73,7 @@ namespace Bureaucracy
             return wage;
         }
 
-        public double GetFacilityMaintenanceCosts()
+        public static double GetFacilityMaintenanceCosts()
         {
             double d = 0;
             for (int i = 0; i < FacilityManager.Instance.Facilities.Count; i++)

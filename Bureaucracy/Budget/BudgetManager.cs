@@ -58,7 +58,7 @@ namespace Bureaucracy
             Debug.Log("[Bureaucracy]: Budget Manager: OnLoad Complete");
         }
 
-        private bool NeedNewKacAlarm()
+        private static bool NeedNewKacAlarm()
         {
             if (!SettingsClass.Instance.StopTimeWarp) return false;
             if (!KacWrapper.AssemblyExists)
@@ -73,7 +73,6 @@ namespace Bureaucracy
                 KacWrapper.Kacapi.KacAlarm alarm = kacAlarms.ElementAt(i);
                 if (alarm.Name == "Next Budget") return false;
             }
-
             return true;
         }
 

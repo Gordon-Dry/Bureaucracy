@@ -33,7 +33,7 @@ namespace Bureaucracy
 
         private void ReplaceStrings()
         {
-            bodyName = Utilities.Instance.GetARandomBody();
+            bodyName = Utilities.GetARandomBody();
             KerbalName = Utilities.Instance.GetARandomKerbal();
             Name = Name.Replace("<kerbal>", KerbalName);
             Name = Name.Replace("<body>", bodyName);
@@ -43,8 +43,8 @@ namespace Bureaucracy
             Body = Body.Replace("<body>", bodyName);
             AcceptString = AcceptString.Replace("<kerbal>", KerbalName);
             AcceptString = AcceptString.Replace("<body>", bodyName);
-            if (declineString != null) declineString = declineString.Replace("<kerbal>", KerbalName);
-            if (declineString != null) declineString = declineString.Replace("<body>", bodyName);
+            declineString = declineString?.Replace("<kerbal>", KerbalName);
+            declineString = declineString?.Replace("<body>", bodyName);
         }
 
         protected abstract void OnEventAccepted();
@@ -64,7 +64,7 @@ namespace Bureaucracy
             eventDialog = PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new MultiOptionDialog("EventDialog", "", Title, UISkinManager.GetSkin("MainMenuSkin"), new Rect(0.5f, 0.5f, 300, 200), dialogElements.ToArray()), false, UISkinManager.GetSkin("MainMenuSkin"));
         }
 
-        private DialogGUIBase[] PaddedLabel(string stringToPad)
+        private static DialogGUIBase[] PaddedLabel(string stringToPad)
         {
             DialogGUIBase[] paddedLayout = new DialogGUIBase[2];
             paddedLayout[0] = new DialogGUISpace(10);

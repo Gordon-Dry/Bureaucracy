@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -25,8 +26,9 @@ namespace Bureaucracy
                 Facilities.Add(new BureaucracyFacility(spf));
             }
             //RB loads super late, well after we're done here, so we need to check if it's installed and set up a BureaucracyFacility for the Observatory.
+            // ReSharper disable once UnusedVariable
             ResearchBodiesWrapper rw = new ResearchBodiesWrapper();
-            if(rw.RBInstalled()) Facilities.Add(new BureaucracyFacility("Observatory"));
+            if(ResearchBodiesWrapper.RbInstalled()) Facilities.Add(new BureaucracyFacility("Observatory"));
             Name = "Construction";
             ThisMonthsBudget = HighLogic.CurrentGame.Parameters.Career.StartingFunds * FundingAllocation;
             Instance = this;
@@ -45,7 +47,7 @@ namespace Bureaucracy
 
         public override double GetAllocatedFunding()
         {
-            return Math.Round(Utilities.Instance.GetNetBudget(Name), 0);
+            return Math.Round(Utilities.GetNetBudget(Name), 0);
         }
 
         protected override Report GetReport()
@@ -55,7 +57,7 @@ namespace Bureaucracy
 
         public override void ProgressTask()
         {
-            double facilityBudget = Utilities.Instance.ConvertMonthlyBudgetToDaily(ThisMonthsBudget) * ProgressTime();
+            double facilityBudget = Utilities.ConvertMonthlyBudgetToDaily(ThisMonthsBudget) * ProgressTime();
             //Find the priority build first
             for (int i = 0; i < Facilities.Count; i++)
             {
@@ -84,8 +86,9 @@ namespace Bureaucracy
             ConfigNode managerNode = cn.GetNode("FACILITY_MANAGER");
             if (managerNode == null) return;
             float.TryParse(managerNode.GetValue("FundingAllocation"), out float funding);
+            // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
             if(double.TryParse(managerNode.GetValue("thisMonth"), out double d)) ThisMonthsBudget = d;
-            else ThisMonthsBudget = Utilities.Instance.GetNetBudget(Name);
+            else ThisMonthsBudget = Utilities.GetNetBudget(Name);
             FundingAllocation = funding;
             float.TryParse(managerNode.GetValue("CostMultiplier"), out CostMultiplier);
             float.TryParse(managerNode.GetValue("FireChance"), out FireChance);
@@ -120,13 +123,14 @@ namespace Bureaucracy
             Debug.Log("[Bureaucracy]: FacilityManager OnSave Complete");
         }
 
+        [SuppressMessage("ReSharper", "Unity.PerformanceCriticalCodeInvocation")]
         public void StartUpgrade(UpgradeableFacility facility)
         {
             BureaucracyFacility facilityToUpgrade = UpgradeableToActualFacility(facility);
             if (facilityToUpgrade == null)
             {
                 Debug.Log("[Bureaucracy]: Upgrade of " + facility.id + " requested but no facility found");
-                UiController.Instance.errorWindow = UiController.Instance.GeneralError("Can't find facility "+facility.id+" - please report this (with your KSP.log) on the Bureaucracy forum thread");
+                UiController.Instance.ErrorWindow = UiController.GeneralError("Can't find facility "+facility.id+" - please report this (with your KSP.log) on the Bureaucracy forum thread");
                 return;
             }
 
@@ -159,7 +163,7 @@ namespace Bureaucracy
             facilityToUpgrade.StartUpgrade(facility);
         }
 
-        private PopupDialog DrawWarningDialog(BureaucracyFacility facility)
+        private static PopupDialog DrawWarningDialog(BureaucracyFacility facility)
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             dialogElements.Add(new DialogGUILabel("Upgrade of "+facility.Name+" will be cancelled. "+(facility.Upgrade.OriginalCost-facility.Upgrade.RemainingInvestment+" will be lost. Are you sure?")));

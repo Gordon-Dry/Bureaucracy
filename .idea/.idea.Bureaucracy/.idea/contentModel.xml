@@ -6,6 +6,7 @@
     <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p="Bureaucracy" t="IncludeRecursive">
         <e p="Budget" t="Include">
+          <e p="BankManager.cs" t="Include" />
           <e p="BudgetEvent.cs" t="Include" />
           <e p="BudgetManager.cs" t="Include" />
           <e p="BudgetReport.cs" t="Include" />

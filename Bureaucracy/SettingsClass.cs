@@ -86,6 +86,7 @@ namespace Bureaucracy
             if (saveVersion != SettingsVersion && saveVersion != PreviousVersion)
             {
                 Debug.Log("[Bureaucracy]: Settings are not compatible with this version of Bureaucracy. Aborting Load");
+                UiController.Instance.ErrorWindow = UiController.GeneralError("Your current settings are not compatible with this version of Bureaucracy. Settings have been reset to default");
                 return;
             }
             bool.TryParse(cn.GetValue("AutoBalanceSettings"), out autoBalanceSettings);
@@ -159,7 +160,7 @@ namespace Bureaucracy
             LongTermBonusDays = BalanceCost(30, balanceMultiplier);
         }
 
-        private int BalanceCost(int initialCost, float balanceMultiplier)
+        private static int BalanceCost(int initialCost, float balanceMultiplier)
         {
             float actualCost = initialCost * balanceMultiplier;
             return (int)actualCost;

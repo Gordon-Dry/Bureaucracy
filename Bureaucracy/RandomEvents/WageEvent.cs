@@ -16,7 +16,7 @@ namespace Bureaucracy
             AcceptString = AcceptString.Replace("<crew>", c.Name);
         }
 
-        private CrewMember FindCrew()
+        private static CrewMember FindCrew()
         {
             if (CrewManager.Instance.Kerbals.Count == 0) return null;
             int i = Utilities.Instance.Randomise.Next(0, CrewManager.Instance.Kerbals.Count);

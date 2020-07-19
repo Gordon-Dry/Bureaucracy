@@ -8,6 +8,7 @@ using KSP.UI.Screens;
 using UnityEngine;
 using UnityEngine.UI;
 using Upgradeables;
+// ReSharper disable MergeCastWithTypeCheck
 
 namespace Bureaucracy
 {

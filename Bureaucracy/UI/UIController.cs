@@ -27,15 +27,15 @@ namespace Bureaucracy
         private PopupDialog mainWindow;
         private PopupDialog facilitiesWindow;
         private PopupDialog researchWindow;
-        public PopupDialog allocationWindow;
-        public PopupDialog crewWindow;
+        public PopupDialog AllocationWindow;
+        public PopupDialog CrewWindow;
         private int fundingAllocation;
         private int constructionAllocation;
         private int researchAllocation;
-        [UsedImplicitly] public PopupDialog errorWindow;
+        [UsedImplicitly] public PopupDialog ErrorWindow;
         private int padding;
         private const int PadFactor = 10;
-        private int startIndex = 0;
+        private int startIndex;
 
         private void Awake()
         {
@@ -50,10 +50,10 @@ namespace Bureaucracy
 
         public void SetupToolbarButton()
         {
-            if(HighLogic.CurrentGame.Mode == Game.Modes.CAREER) toolbarButton = ApplicationLauncher.Instance.AddModApplication(ToggleUI, ToggleUI, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.FLIGHT, GameDatabase.Instance.GetTexture("Bureaucracy/Icon", false));
+            if(HighLogic.CurrentGame.Mode == Game.Modes.CAREER) toolbarButton = ApplicationLauncher.Instance.AddModApplication(ToggleUi, ToggleUi, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.FLIGHT, GameDatabase.Instance.GetTexture("Bureaucracy/Icon", false));
         }
 
-        private void ToggleUI()
+        private void ToggleUi()
         {
             if(UiInactive()) ActivateUi("main");
             else DismissAllWindows();
@@ -61,7 +61,7 @@ namespace Bureaucracy
 
         private bool UiInactive()
         {
-            return mainWindow == null && facilitiesWindow == null && researchWindow == null && crewWindow == null;
+            return mainWindow == null && facilitiesWindow == null && researchWindow == null && CrewWindow == null;
         }
 
         private void ActivateUi(string screen)
@@ -80,19 +80,18 @@ namespace Bureaucracy
                     researchWindow = DrawResearchUi();
                     break;
                 case "allocation":
-                    allocationWindow = DrawBudgetAllocationUi();
+                    AllocationWindow = DrawBudgetAllocationUi();
                     break;
                 case "crew":
-                    crewWindow = DrawCrewUI();
+                    CrewWindow = DrawCrewUi();
                     break;
             }
         }
 
-        private PopupDialog DrawCrewUI()
+        private PopupDialog DrawCrewUi()
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             List<DialogGUIBase> innerElements = new List<DialogGUIBase>();
-            DialogGUIBase[] horizontal;
             int maxIndex = startIndex + 5;
             bool newPage = true;
             for (int i = startIndex; i <= maxIndex; i++)
@@ -106,7 +105,7 @@ namespace Bureaucracy
                 if (crew.Value.CrewReference().rosterStatus != ProtoCrewMember.RosterStatus.Available) continue;
                 if (crew.Value.CrewReference().inactive) continue;
                 if (crew.Value.CrewReference().experienceLevel >= 5) continue;
-                horizontal = new DialogGUIBase[3];
+                DialogGUIBase[] horizontal = new DialogGUIBase[3];
                 horizontal[0] = new DialogGUISpace(10);
                 horizontal[1] = new DialogGUILabel(crew.Key, MessageStyle(true));
                 horizontal[2] = new DialogGUIButton("Train", () => TrainKerbal(crew.Value), false);
@@ -125,15 +124,15 @@ namespace Bureaucracy
         private void SwitchWindow(int newStartIndex)
         {
             startIndex = newStartIndex;
-            crewWindow.Dismiss();
+            CrewWindow.Dismiss();
             Invoke(nameof(NewCrewWindow), 0.1f);
         }
 
         private void NewCrewWindow()
         {
-            crewWindow = DrawCrewUI();
+            CrewWindow = DrawCrewUi();
         }
-        private void TrainKerbal(CrewMember crewMember)
+        private static void TrainKerbal(CrewMember crewMember)
         {
             int newLevel = crewMember.CrewReference().experienceLevel + 1;
             float trainingFee = newLevel * SettingsClass.Instance.BaseTrainingFee;
@@ -175,11 +174,11 @@ namespace Bureaucracy
             horizontalArray[2] = new DialogGUISpace(45);
             horizontalArray[3] = new DialogGUITextInput(researchAllocation.ToString(), false, 3, s => SetAllocation("Research", s), 40.0f, 30.0f);
             innerElements.Add(new DialogGUIHorizontalLayout(horizontalArray));
-            for (int i = 0; i < Bureaucracy.Instance.registeredManagers.Count; i++)
+            for (int i = 0; i < Bureaucracy.Instance.RegisteredManagers.Count; i++)
             {
-                Manager m = Bureaucracy.Instance.registeredManagers.ElementAt(i);
+                Manager m = Bureaucracy.Instance.RegisteredManagers.ElementAt(i);
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
-                if (Utilities.Instance.GetNetBudget(m.Name) == -1.0f) continue;
+                if (Utilities.GetNetBudget(m.Name) == -1.0f) continue;
                 horizontalArray = new DialogGUIBase[3];
                 horizontalArray[0] = new DialogGUISpace(10);
                 horizontalArray[1] = new DialogGUILabel(m.Name+": ");
@@ -198,16 +197,16 @@ namespace Bureaucracy
                     GetRect(dialogElements), dialogElements.ToArray()), false, UISkinManager.GetSkin("MainMenuSkin"), false);
         }
 
-        private string ShowFunding(Manager manager)
+        private static string ShowFunding(Manager manager)
         {
-            return "$"+Math.Round(Utilities.Instance.GetNetBudget(manager.Name),0).ToString(CultureInfo.CurrentCulture);
+            return "$"+Math.Round(Utilities.GetNetBudget(manager.Name),0).ToString(CultureInfo.CurrentCulture);
         }
 
         private string SetAllocation(string managerName, string passedString)
         {
             int.TryParse(passedString, out int i);
             float actualAllocation = i / 100.0f;
-            Manager m = Utilities.Instance.GetManagerByName(managerName);
+            Manager m = Utilities.GetManagerByName(managerName);
             m.FundingAllocation = actualAllocation;
             switch (managerName)
             {
@@ -230,8 +229,8 @@ namespace Bureaucracy
             if (mainWindow != null) mainWindow.Dismiss();
             if (facilitiesWindow != null) facilitiesWindow.Dismiss();
             if (researchWindow != null) researchWindow.Dismiss();
-            if (allocationWindow != null) allocationWindow.Dismiss();
-            if(crewWindow != null) crewWindow.Dismiss();
+            if (AllocationWindow != null) AllocationWindow.Dismiss();
+            if(CrewWindow != null) CrewWindow.Dismiss();
             startIndex = 0;
         }
 
@@ -244,21 +243,21 @@ namespace Bureaucracy
             else
             {
                 innerElements.Add(new DialogGUISpace(10));
-                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Next Budget: " + Utilities.Instance.ConvertUtToKspTimeStamp(BudgetManager.Instance.NextBudget.CompletionTime), false)));
-                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Gross Budget: $" + Utilities.Instance.GetGrossBudget(), false)));
-                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Wage Costs: $" + Costs.Instance.GetWageCosts(), false)));
-                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Facility Maintenance Costs: $" + Costs.Instance.GetFacilityMaintenanceCosts(), false)));
+                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Next Budget: " + Utilities.ConvertUtToKspTimeStamp(BudgetManager.Instance.NextBudget.CompletionTime), false)));
+                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Gross Budget: $" + Utilities.GetGrossBudget(), false)));
+                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Wage Costs: $" + Costs.GetWageCosts(), false)));
+                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Facility Maintenance Costs: $" + Costs.GetFacilityMaintenanceCosts(), false)));
                 innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Launch Costs: $"+Costs.Instance.GetLaunchCosts(), false)));
                 innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Mission Bonuses: $" + GetBonusesToPay(), false)));
-                for (int i = 0; i < Bureaucracy.Instance.registeredManagers.Count; i++)
+                for (int i = 0; i < Bureaucracy.Instance.RegisteredManagers.Count; i++)
                 {
-                    Manager m = Bureaucracy.Instance.registeredManagers.ElementAt(i);
+                    Manager m = Bureaucracy.Instance.RegisteredManagers.ElementAt(i);
                     if (m.Name == "Budget") continue;
-                    double departmentFunding = Math.Round(Utilities.Instance.GetNetBudget(m.Name), 0);
+                    double departmentFunding = Math.Round(Utilities.GetNetBudget(m.Name), 0);
                     if (departmentFunding < 0.0f) continue;
                     innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel(m.Name + " Department Funding: $" + departmentFunding, false)));
                 }
-                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Net Budget: $"+Utilities.Instance.GetNetBudget("Budget"), false)));
+                innerElements.Add(new DialogGUIHorizontalLayout(PaddedLabel("Net Budget: $"+Utilities.GetNetBudget("Budget"), false)));
                 DialogGUIVerticalLayout vertical = new DialogGUIVerticalLayout(innerElements.ToArray());
                 dialogElements.Add(new DialogGUIScrollList(-Vector2.one, false, false, vertical));
                 DialogGUIBase[] horizontal = new DialogGUIBase[6];
@@ -295,7 +294,7 @@ namespace Bureaucracy
             if (stringToEvaluate.Length *PadFactor > padding) padding = stringToEvaluate.Length * PadFactor;
         }
 
-        private UIStyle MessageStyle(bool largePrint)
+        private static UIStyle MessageStyle(bool largePrint)
         {
             UIStyle style = new UIStyle
             {
@@ -312,7 +311,7 @@ namespace Bureaucracy
             return style;
         }
 
-        private int GetBonusesToPay()
+        private static int GetBonusesToPay()
         {
             int bonusesToPay = 0;
             for (int i = 0; i < CrewManager.Instance.Kerbals.Count; i++)
@@ -417,11 +416,11 @@ namespace Bureaucracy
         public void ValidateAllocations()
         {
             int allocations = fundingAllocation + constructionAllocation + researchAllocation;
-            if (allocations != 100) errorWindow = AllocationErrorWindow();
+            if (allocations != 100) ErrorWindow = AllocationErrorWindow();
             else DismissAllWindows();
         }
 
-        private PopupDialog AllocationErrorWindow()
+        private static PopupDialog AllocationErrorWindow()
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             dialogElements.Add(new DialogGUILabel("Allocations do not add up to 100%"));
@@ -440,7 +439,7 @@ namespace Bureaucracy
             RemoveToolbarButton(HighLogic.LoadedScene);
         }
 
-        public PopupDialog NoHireWindow()
+        public static PopupDialog NoHireWindow()
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             dialogElements.Add(new DialogGUILabel("Due to reduced staffing levels we are unable to take on any new kerbals at this time"));
@@ -448,7 +447,7 @@ namespace Bureaucracy
             return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new MultiOptionDialog("NoHire", "", "Can't Hire!", UISkinManager.GetSkin("MainMenuSkin"), new Rect(0.5f, 0.5f, 100, 200), dialogElements.ToArray()), false, UISkinManager.GetSkin("MainMenuSkin"));
         }
         
-        public PopupDialog GeneralError(string error)
+        public static PopupDialog GeneralError(string error)
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             dialogElements.Add(new DialogGUILabel(error));
@@ -477,7 +476,7 @@ namespace Bureaucracy
             SetAllocation("Construction", constructionAllocation.ToString());
         }
 
-        public PopupDialog NoLaunchesWindow()
+        public static PopupDialog NoLaunchesWindow()
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             dialogElements.Add(new DialogGUILabel("Due to reduced funding levels, we were unable to afford any fuel"));
@@ -487,7 +486,7 @@ namespace Bureaucracy
             return PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new MultiOptionDialog("NoFuel", "", "No Fuel Available!", UISkinManager.GetSkin("MainMenuSkin"), new Rect(0.5f, 0.5f, 200,160), dialogElements.ToArray()), false, UISkinManager.GetSkin("MainMenuSkin"));
         }
 
-        public PopupDialog KctError()
+        public static PopupDialog KctError()
         {
             List<DialogGUIBase> dialogElements = new List<DialogGUIBase>();
             dialogElements.Add(new DialogGUILabel("It looks like you have Kerbal Construction Time installed. You should not use KCT's Facility Upgrade and Bureaucracy's Facility Upgrade at the same time. Bad things will happen."));

@@ -4,7 +4,7 @@ using Contracts;
 using KSP.UI.Screens;
 using UnityEngine;
 using FlightTracker;
-using JetBrains.Annotations;
+// ReSharper disable MemberCanBeMadeStatic.Local
 
 namespace Bureaucracy
 {
@@ -45,16 +45,16 @@ namespace Bureaucracy
             Debug.Log("[Bureaucracy]: All Events Successfully Registered");
         }
 
-        private void AstronautComplexDespawned()
+        private static void AstronautComplexDespawned()
         {
-            AstronautComplexOverride.Instance.astronautComplexSpawned = false;
+            AstronautComplexOverride.Instance.AstronautComplexSpawned = false;
         }
 
         private void AstronautComplexSpawned()
         {
             if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER) return;
-            AstronautComplexOverride.Instance.updateCount = 4;
-            AstronautComplexOverride.Instance.astronautComplexSpawned = true;
+            AstronautComplexOverride.Instance.UpdateCount = 4;
+            AstronautComplexOverride.Instance.AstronautComplexSpawned = true;
         }
 
         private void PotentialKerbalDeath(ProtoCrewMember crewMember, ProtoCrewMember.RosterStatus statusFrom, ProtoCrewMember.RosterStatus statusTo)
@@ -71,7 +71,7 @@ namespace Bureaucracy
             if (FacilityManager.Instance.GetFacilityByName("AstronautComplex").IsClosed)
             {
                 Funding.Instance.AddFunds(GameVariables.Instance.GetRecruitHireCost(numberOfActiveKerbals - 1), TransactionReasons.CrewRecruited);
-                UiController.Instance.errorWindow = UiController.Instance.NoHireWindow();
+                UiController.Instance.ErrorWindow = UiController.NoHireWindow();
                 HighLogic.CurrentGame.CrewRoster.Remove(crewMember);
                 return;
             }
@@ -128,7 +128,7 @@ namespace Bureaucracy
             BureaucracyFacility bf = FacilityManager.Instance.GetFacilityByName(editor);
             if (!bf.IsClosed) return;
             bf.LaunchesThisMonth++;
-            if (bf.LaunchesThisMonth > 2) Utilities.Instance.SabotageLaunch();
+            if (bf.LaunchesThisMonth > 2) Utilities.SabotageLaunch();
 
         }
 

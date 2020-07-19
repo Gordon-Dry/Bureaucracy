@@ -50,7 +50,7 @@ namespace Bureaucracy
             return 0.0f;
         }
 
-        private List<UpgradeableFacility> GetFacilityById(string id)
+        private static List<UpgradeableFacility> GetFacilityById(string id)
         {
             return ScenarioUpgradeableFacilities.protoUpgradeables[id].facilityRefs;
         }
@@ -69,6 +69,7 @@ namespace Bureaucracy
                 facilityToUpgrade.SetLevel(levelRequested);
                 UpgradeHeld = false;
             }
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             parentFacility.OnUpgradeCompleted();
         }
 

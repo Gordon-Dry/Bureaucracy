@@ -21,6 +21,7 @@ namespace Bureaucracy
                 ReportBuilder.AppendLine(unhappyCrewMember.Key.Name + ": " + unhappyCrewMember.Value);
             }
 
+            // ReSharper disable once InvertIf
             if (SettingsClass.Instance.RetirementEnabled)
             {
                 CrewManager.Instance.ProcessQuitters();

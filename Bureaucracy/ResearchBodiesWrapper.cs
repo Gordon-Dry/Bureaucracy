@@ -1,12 +1,10 @@
-using System;
-using System.Reflection;
 using UnityEngine;
 
 namespace Bureaucracy
 {
     public class ResearchBodiesWrapper
     {
-        public bool RBInstalled()
+        public static bool RbInstalled()
         {
             Debug.Log("[Bureaucracy]: Checking For ResearchBodies");
             //Adapted from Kerbalism.Contracts
